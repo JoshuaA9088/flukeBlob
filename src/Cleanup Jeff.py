@@ -1,11 +1,11 @@
 sfrom Myro import *
 from Graphics import *
-import colorsys 
+import colorsys
 from socket import *
 
 centroid = None
 robot = getRobot()
-if robot == None:   
+if robot == None:
     camera = makeRobot("Scribbler","com4")
     klaus = makeRobot("Scribbler","com7")
 
@@ -15,7 +15,7 @@ def learningToPhoto():
         origPic = camera.takePicture()
     except SystemError:
         print("I'm in except")
-        origPic = camera.takePicture()        
+        origPic = camera.takePicture()
     #YUV Values used in board tracking
     yuvValues = []
     transformPic = Picture(origPic)
@@ -51,7 +51,7 @@ def learningToPhoto():
             else:
                 boardBlobPic.setRGB(x,y,255,255,255)
                 whitePixelsBoard.append([x,y])
-            #Create blob image for chassis      
+            #Create blob image for chassis
             if foundChassis == True:
                 chassisBlobPic.setRGB(x,y,0,0,0)
                 greenPixelsChassis.append([x,y])
@@ -60,18 +60,18 @@ def learningToPhoto():
             else:
                 chassisBlobPic.setRGB(x,y,255,255,255)
                 whitePixelsChassis.append([x,y])
-                
-                
-    #Picture image in YUV space 
+
+
+    #Picture image in YUV space
     show(transformPic, "Transform")
-    #Blob image for board    
+    #Blob image for board
     show(boardBlobPic,"Board Blob Image")
     #Blob image for chassis
     show(chassisBlobPic, "Chassis Blob Image")
     #attack win handle to original image
     win = getWindow("original_image")
     show(origPic, "original_image")
-    
+
     #Calculates centroid data
     try:
         xCentroidBoard = xGreenBoard / len(greenPixelsBoard)
@@ -82,10 +82,10 @@ def learningToPhoto():
     except ZeroDivisionError:
         print("Zero Division Error")
     #Globalize centroid data to be used in other functions
-    global centroid  
+    global centroid
     centroid = [xCentroidChassis,yCentroidChassis,xCentroidBoard,yCentroidBoard]
-    
-    
+
+
     #Centroid Stats Chassis
     print("AVERAGE X VALUE Chassis", xCentroidChassis)
     print("AVERAGE Y VALUE Chassis", yCentroidChassis)
@@ -100,8 +100,8 @@ def learningToPhoto():
     chassisMarker.setFill(alpha)
     boardMarker.draw(win)
     chassisMarker.draw(win)
-  
-#Uses YIQ to detect red. Predator vision, red is green and everything else is red.     
+
+#Uses YIQ to detect red. Predator vision, red is green and everything else is red.
 def detectChassis(r,g,b,chassisPic,x,y):
     yiqValues=colorsys.rgb_to_yiq(r,g,b)
     chassisPic.setRGB(x,y,yiqValues[0],yiqValues[1],yiqValues[2])
@@ -110,15 +110,14 @@ def detectChassis(r,g,b,chassisPic,x,y):
         return True
     else:
         return False
-        
-#Uses YUV to see board or balloon, best works with blue.        
+
+#Uses YUV to see board or balloon, best works with blue.
 def detectBoard(r,g,b,boardPic,x,y):
     yuvValues = rgb2yuv(r,g,b)
     boardPic.setRGB(x,y,yuvValues[0],yuvValues[1],yuvValues[2])
-    yiqPixel = boardPic.getRGB(x,y)        
+    yiqPixel = boardPic.getRGB(x,y)
     if yiqPixel[0] <= 200 and yiqPixel[1] >=140 and yiqPixel[2] <=200:
         return True
     else:
         return False
 
-        
